@@ -1,98 +1,53 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useEffect } from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import BalanceCard from '@/components/BalanceCard';
+import TransactionItem from '@/components/TransactionItem';
+import FloatingActionButton from '@/components/FloatingActionButton';
+import { useAccountStore } from '@/store/useAccountStore';
+import { useTransactionStore } from '@/store/useTransactionStore';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
+  const refreshAccounts = useAccountStore((s) => s.refresh);
+  const total = useAccountStore((s) => s.total());
+  const { refresh, items, totals } = useTransactionStore();
+  const { income, expense } = totals();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    refreshAccounts();
+    refresh();
+  }, [refreshAccounts, refresh]);
+
+  return (
+    <View className="flex-1 p-4">
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-2xl font-semibold">Expenses</Text>
+        </View>
+
+        <BalanceCard total={total} income={income} expense={expense} />
+
+        <View className="mt-6">
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-lg font-semibold">Recent</Text>
+            <Pressable onPress={() => router.push('/(tabs)/statistics')}>
+              <Text className="text-sky-600">See All</Text>
+            </Pressable>
+          </View>
+          {items.length === 0 ? (
+            <Text className="text-gray-500">No transactions yet.</Text>
+          ) : (
+            items.slice(0, 10).map((t) => <TransactionItem key={t.id} item={t} />)
+          )}
+        </View>
+      </ScrollView>
+
+      <FloatingActionButton
+        onAddExpense={() => router.push({ pathname: '/(modals)/add-transaction', params: { type: 'expense' } })}
+        onAddIncome={() => router.push({ pathname: '/(modals)/add-transaction', params: { type: 'income' } })}
+        onAddAccount={() => router.push('/(modals)/add-account')}
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

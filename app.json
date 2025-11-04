@@ -8,8 +8,8 @@
     "scheme": "billtracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-  "ios": {
-      "supportsTablet": true,
+    "ios": {
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +38,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
