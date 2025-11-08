@@ -1,5 +1,8 @@
-import { View, Text } from 'react-native';
 import React from 'react';
+import { View, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react-native';
+
 import { formatCurrency } from '@/utils/format';
 
 type Props = {
@@ -9,26 +12,53 @@ type Props = {
   currency?: string;
 };
 
-export default function BalanceCard({ total, income, expense, currency = 'USD' }: Props) {
+function StatPill({
+  label,
+  amount,
+  color,
+  Icon,
+  currency,
+}: {
+  label: string;
+  amount: number;
+  color: string;
+  Icon: typeof ArrowUpCircle;
+  currency: string;
+}) {
   return (
-    <View className="rounded-2xl bg-sky-400/10 dark:bg-sky-400/20 p-4 gap-2">
-      <Text className="text-base text-gray-500 dark:text-gray-300">Total Balance</Text>
-      <Text className="text-3xl font-semibold">{formatCurrency(total, currency)}</Text>
-      <View className="flex-row justify-between mt-2">
-        <View className="flex-1 mr-2 rounded-xl bg-green-500/10 p-3">
-          <Text className="text-xs text-gray-500 dark:text-gray-300">Income</Text>
-          <Text className="text-lg font-medium text-green-600 dark:text-green-400">
-            {formatCurrency(income, currency)}
-          </Text>
-        </View>
-        <View className="flex-1 ml-2 rounded-xl bg-rose-500/10 p-3">
-          <Text className="text-xs text-gray-500 dark:text-gray-300">Expense</Text>
-          <Text className="text-lg font-medium text-rose-600 dark:text-rose-400">
-            {formatCurrency(expense, currency)}
-          </Text>
-        </View>
+    <View className="flex-1 rounded-3xl border border-graphite bg-jungle-900/80 px-4 py-3">
+      <View className="flex-row items-center gap-2 mb-1">
+        <Icon size={18} color={color} />
+        <Text className="text-mist text-xs uppercase tracking-wider">{label}</Text>
       </View>
+      <Text className="text-lg font-semibold text-white">{formatCurrency(amount, currency)}</Text>
     </View>
   );
 }
 
+export default function BalanceCard({ total, income, expense, currency = 'USD' }: Props) {
+  return (
+    <LinearGradient
+      colors={['#191F1B', '#0C100E']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ borderRadius: 32 }}>
+      <View className="rounded-4xl p-5">
+        <View className="flex-row items-center justify-between mb-6">
+          <View>
+            <Text className="text-mist text-sm">Total Balance</Text>
+            <Text className="text-4xl font-extrabold text-white mt-1">{formatCurrency(total, currency)}</Text>
+          </View>
+          <View className="rounded-2xl border border-graphite px-4 py-2 bg-black/20">
+            <Text className="text-xs text-mist uppercase tracking-wider">This Month</Text>
+            <Text className="text-lg font-semibold text-white">{formatCurrency(income - expense, currency)}</Text>
+          </View>
+        </View>
+        <View className="flex-row gap-3">
+          <StatPill label="Income" amount={income} color="#9FE870" Icon={ArrowUpCircle} currency={currency} />
+          <StatPill label="Expense" amount={expense} color="#FB7185" Icon={ArrowDownCircle} currency={currency} />
+        </View>
+      </View>
+    </LinearGradient>
+  );
+}

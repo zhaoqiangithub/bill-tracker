@@ -1,45 +1,41 @@
 import React from 'react';
 import { View, Pressable, Text } from 'react-native';
-import { Plus, Minus, Wallet, ArrowDownCircle, ArrowUpCircle } from 'lucide-react-native';
+import { ArrowDownCircle, ArrowUpCircle, Wallet, Mic } from 'lucide-react-native';
 
 type Props = {
   onAddExpense?: () => void;
   onAddIncome?: () => void;
   onAddAccount?: () => void;
+  onScanReceipt?: () => void;
 };
 
-export default function FloatingActionButton({ onAddExpense, onAddIncome, onAddAccount }: Props) {
-  const [open, setOpen] = React.useState(false);
+const actions = [
+  { key: 'expense', label: '支出', color: '#FB7185', Icon: ArrowDownCircle, actionKey: 'onAddExpense' as const },
+  { key: 'income', label: '收入', color: '#4ADE80', Icon: ArrowUpCircle, actionKey: 'onAddIncome' as const },
+  { key: 'account', label: '账户', color: '#60A5FA', Icon: Wallet, actionKey: 'onAddAccount' as const },
+  { key: 'voice', label: '语音', color: '#FACC15', Icon: Mic, actionKey: 'onScanReceipt' as const },
+];
+
+export default function FloatingActionButton(props: Props) {
   return (
-    <View className="absolute bottom-6 right-6 items-end gap-3">
-      {open && (
-        <>
-          <Pressable
-            onPress={onAddExpense}
-            className="flex-row items-center gap-2 rounded-full bg-rose-500 px-3 py-2">
-            <ArrowDownCircle color="#fff" size={18} />
-            <Text className="text-white">Add Expense</Text>
-          </Pressable>
-          <Pressable
-            onPress={onAddIncome}
-            className="flex-row items-center gap-2 rounded-full bg-green-500 px-3 py-2">
-            <ArrowUpCircle color="#fff" size={18} />
-            <Text className="text-white">Add Income</Text>
-          </Pressable>
-          <Pressable
-            onPress={onAddAccount}
-            className="flex-row items-center gap-2 rounded-full bg-sky-500 px-3 py-2">
-            <Wallet color="#fff" size={18} />
-            <Text className="text-white">Add Account</Text>
-          </Pressable>
-        </>
-      )}
-      <Pressable
-        onPress={() => setOpen((v) => !v)}
-        className="rounded-full bg-black/80 dark:bg-white/10 p-4">
-        {open ? <Minus color="#fff" /> : <Plus color="#fff" />}
-      </Pressable>
+    <View className="absolute bottom-6 left-0 right-0 px-5">
+      <View className="flex-row items-center justify-between rounded-4xl border border-graphite bg-night-900/90 px-5 py-4">
+        {actions.map(({ key, label, color, Icon, actionKey }) => {
+          const disabled = !props[actionKey];
+          return (
+            <Pressable
+              key={key}
+              onPress={props[actionKey]}
+              disabled={disabled}
+              className={`items-center ${disabled ? 'opacity-40' : 'opacity-100'}`}>
+              <View className="mb-2 h-12 w-12 items-center justify-center rounded-2xl border border-graphite bg-night-800">
+                <Icon size={22} color={color} />
+              </View>
+              <Text className="text-xs text-white">{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
-
